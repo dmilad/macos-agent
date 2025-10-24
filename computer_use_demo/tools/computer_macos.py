@@ -83,15 +83,15 @@ def chunks(s: str, chunk_size: int) -> list[str]:
 # macOS keyboard mapping from X11/Linux keys to PyAutoGUI keys
 MACOS_KEY_MAPPING = {
     # Modifier keys
-    "ctrl": "command",  # macOS uses Command instead of Ctrl
-    "Control_L": "command",
-    "Control_R": "command",
+    # "ctrl": "command",  # macOS uses Command instead of Ctrl
+    # "Control_L": "command",
+    # "Control_R": "command",
     "alt": "option",
-    "Alt_L": "option",
-    "Alt_R": "option",
+    # "Alt_L": "option",
+    # "Alt_R": "option",
     "super": "command",
-    "Super_L": "command",
-    "Super_R": "command",
+    # "Super_L": "command",
+    # "Super_R": "command",
     "Meta_L": "command",
     "Meta_R": "command",
     # Special keys
