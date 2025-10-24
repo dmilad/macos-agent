@@ -78,7 +78,7 @@ async def sampling_loop(
     system_prompt_suffix: str,
     messages: list[BetaMessageParam],
     output_callback: Callable[[BetaContentBlockParam], None],
-    tool_output_callback: Callable[[ToolResult, str], None],
+    tool_output_callback: Callable[[ToolResult, str, str, dict], None],
     api_response_callback: Callable[
         [httpx.Request, httpx.Response | object | None, Exception | None], None
     ],
@@ -176,14 +176,15 @@ async def sampling_loop(
             if isinstance(content_block, dict) and content_block.get("type") == "tool_use":
                 # Type narrowing for tool use blocks
                 tool_use_block = cast(BetaToolUseBlockParam, content_block)
+                tool_input = cast(dict[str, Any], tool_use_block.get("input", {}))
                 result = await tool_collection.run(
                     name=tool_use_block["name"],
-                    tool_input=cast(dict[str, Any], tool_use_block.get("input", {})),
+                    tool_input=tool_input,
                 )
                 tool_result_content.append(
                     _make_api_tool_result(result, tool_use_block["id"])
                 )
-                tool_output_callback(result, tool_use_block["id"])
+                tool_output_callback(result, tool_use_block["id"], tool_use_block["name"], tool_input)
 
         if not tool_result_content:
             return messages

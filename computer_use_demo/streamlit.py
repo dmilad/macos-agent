@@ -30,6 +30,7 @@ from computer_use_demo.loop import (
     sampling_loop,
 )
 from computer_use_demo.tools import ToolResult, ToolVersion
+from computer_use_demo.action_recorder import ActionRecorder
 
 PROVIDER_TO_DEFAULT_MODEL_NAME: dict[APIProvider, str] = {
     APIProvider.ANTHROPIC: "claude-sonnet-4-5-20250929",
@@ -154,6 +155,10 @@ def setup_state():
         st.session_state.token_efficient_tools_beta = False
     if "in_sampling_loop" not in st.session_state:
         st.session_state.in_sampling_loop = False
+    if "action_recorder" not in st.session_state:
+        st.session_state.action_recorder = ActionRecorder()
+    if "record_actions_pending" not in st.session_state:
+        st.session_state.record_actions_pending = False
 
 
 def _reset_model():
@@ -265,6 +270,10 @@ async def main():
                 st.session_state.clear()
                 st.rerun()
 
+        if st.button("Record Actions"):
+            st.session_state.record_actions_pending = True
+            st.rerun()
+
     if not st.session_state.auth_validated:
         if auth_error := validate_auth(
             st.session_state.provider, st.session_state.api_key
@@ -273,6 +282,11 @@ async def main():
             return
         else:
             st.session_state.auth_validated = True
+
+    # Handle pending action recording
+    if st.session_state.record_actions_pending:
+        st.session_state.record_actions_pending = False
+        await _handle_record_actions()
 
     chat, http_logs = st.tabs(["Chat", "HTTP Exchange Logs"])
     new_message = st.chat_input(
@@ -314,6 +328,8 @@ async def main():
                 }
             )
             _render_message(Sender.USER, new_message)
+            # Record user message
+            st.session_state.action_recorder.record_user_message(new_message)
 
         try:
             most_recent_message = st.session_state["messages"][-1]
@@ -430,6 +446,26 @@ def save_to_storage(filename: str, data: str) -> None:
         st.write(f"Debug: Error saving {filename}: {e}")
 
 
+async def _handle_record_actions():
+    """Handle the Record Actions button click."""
+    try:
+        if st.session_state.action_recorder.get_action_count() == 0:
+            st.warning("No actions to record yet. Use the agent to perform some tasks first.")
+            return
+
+        with st.spinner("Processing and saving actions..."):
+            filepath = await st.session_state.action_recorder.process_and_save(
+                api_key=st.session_state.api_key,
+                output_dir="."
+            )
+            st.success(f"Actions recorded successfully to: {filepath}")
+
+            # Clear the recorder for the next session
+            st.session_state.action_recorder.clear()
+    except Exception as e:
+        st.error(f"Error recording actions: {str(e)}")
+
+
 def _api_response_callback(
     request: httpx.Request,
     response: httpx.Response | object | None,
@@ -448,11 +484,22 @@ def _api_response_callback(
 
 
 def _tool_output_callback(
-    tool_output: ToolResult, tool_id: str, tool_state: dict[str, ToolResult]
+    tool_output: ToolResult,
+    tool_id: str,
+    tool_name: str,
+    tool_input: dict,
+    tool_state: dict[str, ToolResult]
 ):
     """Handle a tool output by storing it to state and rendering it."""
     tool_state[tool_id] = tool_output
     _render_message(Sender.TOOL, tool_output)
+
+    # Record the tool execution
+    st.session_state.action_recorder.record_tool_use(
+        tool_name=tool_name,
+        tool_input=tool_input,
+        tool_result=tool_output
+    )
 
 
 def _render_api_response(
@@ -523,9 +570,11 @@ def _render_message(
         elif isinstance(message, dict):
             if message["type"] == "text":
                 st.write(message["text"])
+                st.session_state.action_recorder.record_thinking(message["text"])
             elif message["type"] == "thinking":
                 thinking_content = message.get("thinking", "")
                 st.markdown(f"[Thinking]\n\n{thinking_content}")
+                st.session_state.action_recorder.record_thinking(thinking_content)
             elif message["type"] == "tool_use":
                 st.code(f"Tool Use: {message['name']}\nInput: {message['input']}")
             else:
