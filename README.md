@@ -112,7 +112,6 @@ The agent supports multiple tool versions:
 
 - **computer_use_20241022** - Original October 2024 version (basic actions)
 - **computer_use_20250124** - January 2025 version (adds scroll, hold_key, wait, triple_click)
-- **computer_use_20250429** - April 2025 version (removes undo_edit)
 
 Default: **computer_use_20250124** (recommended for full functionality)
 

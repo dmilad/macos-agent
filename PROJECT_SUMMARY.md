@@ -89,7 +89,6 @@ await asyncio.to_thread(pyautogui.screenshot)
 **Maintained:** Full backward compatibility with all tool versions
 - `computer_use_20241022` - Original October 2024
 - `computer_use_20250124` - Extended January 2025
-- `computer_use_20250429` - Latest April 2025
 
 ## Features Implemented
 

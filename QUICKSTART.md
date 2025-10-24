@@ -113,7 +113,6 @@ In the Streamlit sidebar:
 ### Tool version
 - `computer_use_20250124` (recommended) - Full features
 - `computer_use_20241022` - Original version
-- `computer_use_20250429` - Latest updates
 
 ## Stopping the Agent
 

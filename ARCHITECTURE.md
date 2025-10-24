@@ -348,12 +348,6 @@ Different Claude models support different tool versions:
 │  ├─ EditTool20250728                                       │
 │  └─ BashTool20250124                                       │
 │                                                             │
-│  computer_use_20250429 (Apr 2025)                          │
-│  ├─ ComputerToolMacOS20250124 (same as Jan)               │
-│  ├─ EditTool20250429                                       │
-│  │   └─ Removes: undo_edit command                         │
-│  └─ BashTool20250124 (same as Jan)                        │
-│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 

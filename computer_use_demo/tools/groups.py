@@ -7,10 +7,10 @@ from .computer_macos import ComputerToolMacOS20241022, ComputerToolMacOS20250124
 from .edit import EditTool20241022, EditTool20250728
 
 ToolVersion = Literal[
-    "computer_use_20250124", "computer_use_20241022", "computer_use_20250429"
+    "computer_use_20250124", "computer_use_20241022"
 ]
 BetaFlag = Literal[
-    "computer-use-2024-10-22", "computer-use-2025-01-24", "computer-use-2025-04-29"
+    "computer-use-2024-10-22", "computer-use-2025-01-24"
 ]
 
 
@@ -29,11 +29,6 @@ TOOL_GROUPS: list[ToolGroup] = [
     ),
     ToolGroup(
         version="computer_use_20250124",
-        tools=[ComputerToolMacOS20250124, EditTool20250728, BashTool20250124],
-        beta_flag="computer-use-2025-01-24",
-    ),
-    ToolGroup(
-        version="computer_use_20250429",
         tools=[ComputerToolMacOS20250124, EditTool20250728, BashTool20250124],
         beta_flag="computer-use-2025-01-24",
     ),
