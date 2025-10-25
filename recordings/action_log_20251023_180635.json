@@ -2,16 +2,16 @@
   "session_id": "2025-10-23T18:05:42.446334",
   "recorded_at": "2025-10-23T18:06:35.558383",
   "request": {
-    "type": "thinking",
+    "type": "text",
     "content": {
-      "thinking": "open Notes and tell me how many tags i have"
+      "text": "open Notes and tell me how many tags i have"
     }
   },
   "all_actions": [
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I'll help you open Notes and count your tags. Let me start by taking a screenshot to see the current state of the screen, then open the Notes app."
+        "text": "I'll help you open Notes and count your tags. Let me start by taking a screenshot to see the current state of the screen, then open the Notes app."
       }
     },
     {
@@ -27,9 +27,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I can see the desktop with a Terminal window and Chat application open. Now I'll open the Notes app. I can use the bash command to open it."
+        "text": "I can see the desktop with a Terminal window and Chat application open. Now I'll open the Notes app. I can use the bash command to open it."
       }
     },
     {
@@ -58,9 +58,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Perfect! Notes is now open. I can see the tags section on the left sidebar. Let me count the tags you have:\n\n1. #bm\n2. #checklist\n3. #home\n4. #p44\n5. #recipe\n6. #shoveit\n7. #therapy\n\n**You have 7 tags in total.**"
+        "text": "Perfect! Notes is now open. I can see the tags section on the left sidebar. Let me count the tags you have:\n\n1. #bm\n2. #checklist\n3. #home\n4. #p44\n5. #recipe\n6. #shoveit\n7. #therapy\n\n**You have 7 tags in total.**"
       }
     }
   ],
@@ -91,9 +91,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Perfect! Notes is now open. I can see the tags section on the left sidebar. Let me count the tags you have:\n\n1. #bm\n2. #checklist\n3. #home\n4. #p44\n5. #recipe\n6. #shoveit\n7. #therapy\n\n**You have 7 tags in total.**"
+        "text": "Perfect! Notes is now open. I can see the tags section on the left sidebar. Let me count the tags you have:\n\n1. #bm\n2. #checklist\n3. #home\n4. #p44\n5. #recipe\n6. #shoveit\n7. #therapy\n\n**You have 7 tags in total.**"
       }
     }
   ],

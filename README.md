@@ -21,6 +21,7 @@ This project adapts Anthropic's [computer-use-demo](https://github.com/anthropic
 - **Run bash commands** - Execute terminal commands
 - **Edit files** - Create, modify, and manage files
 - **Perform complex tasks** - Chain multiple actions together
+- **Learn from past tasks** - Record successful actions and retrieve them for similar future tasks
 
 ## Changes from Original
 
@@ -128,6 +129,85 @@ The agent automatically translates Linux/X11 keyboard shortcuts to macOS:
 
 You can use either notation in your prompts - the agent will handle it.
 
+## Action Recording & Learning
+
+The agent can record successful task completions and learn from them for future similar tasks.
+
+### How It Works
+
+1. **Action Recording** - As the agent works, it records all actions (thinking, tool use, results)
+2. **Narrative Generation** - When a task completes successfully, Claude analyzes the actions and creates a concise narrative of the successful path
+3. **Vector Indexing** - The request and narrative are embedded using sentence transformers and stored in a vector database (Annoy)
+4. **Semantic Search** - For new requests, the agent searches for similar past tasks and retrieves relevant solutions
+
+### Recording a Task
+
+In the Streamlit UI, after completing a task:
+1. Click the "Record this session" button
+2. The agent will process all actions and save them to `recordings/action_log_TIMESTAMP.json`
+3. The recording includes:
+   - Original user request
+   - All actions taken (filtered to successful path)
+   - Generated narrative with explanatory commentary
+
+### Building the Vector Index
+
+After recording several tasks, build the vector index:
+
+```bash
+# Build index from all recordings
+python -m computer_use_demo.build_index
+
+# Force rebuild
+python -m computer_use_demo.build_index --force
+
+# Custom settings
+python -m computer_use_demo.build_index --recordings-dir my_recordings --model all-MiniLM-L6-v2 --trees 10
+```
+
+This creates:
+- `recordings/actions.ann` - Annoy vector index
+- `recordings/index_metadata.json` - Metadata and embeddings info
+
+### Using Learned Actions
+
+Once the index is built, enable it in the Streamlit UI:
+1. Toggle "Use vector DB for similar tasks" in the sidebar
+2. When you enter a new request, the agent will:
+   - Search for similar past tasks
+   - Inject the relevant narrative as context
+   - Use it to guide the current task execution
+
+### Example Workflow
+
+```bash
+# 1. Complete a task via the UI
+"Check how many p44 related messages I have in Notes"
+
+# 2. Record the session (click button in UI)
+# Creates: recordings/action_log_20251023_170556.json
+
+# 3. Complete more tasks and record them
+"Open Calculator and compute 15 * 234"
+"Create a text file on Desktop with today's date"
+
+# 4. Build the index
+python -m computer_use_demo.build_index
+
+# 5. Enable vector DB in UI sidebar
+
+# 6. Ask a similar question
+"How many messages tagged with 'project-x' are in Notes?"
+# Agent retrieves the p44 example and follows similar steps
+```
+
+### Benefits
+
+- **Faster execution** - Skip exploratory actions, go straight to what works
+- **Consistency** - Reuse proven approaches for similar tasks
+- **Knowledge base** - Build up a library of solutions over time
+- **Reduced API costs** - Fewer trial-and-error iterations
+
 ## Project Structure
 
 ```
@@ -136,6 +216,10 @@ macos-agent/
 │   ├── __init__.py
 │   ├── loop.py                    # Core agent loop (modified system prompt)
 │   ├── streamlit.py               # Streamlit UI (Docker code removed)
+│   ├── action_recorder.py         # ⭐ NEW: Records actions for learning
+│   ├── vector_db.py               # ⭐ NEW: Vector DB for semantic search
+│   ├── build_index.py             # ⭐ NEW: CLI to build vector index
+│   ├── test_query.py              # Test vector DB queries
 │   └── tools/
 │       ├── __init__.py
 │       ├── base.py                # Tool base classes (unchanged)
@@ -145,6 +229,10 @@ macos-agent/
 │       ├── groups.py              # Tool versions (updated imports)
 │       ├── run.py                 # Command runner (unchanged)
 │       └── computer_macos.py      # ⭐ NEW: macOS computer control
+├── recordings/                    # ⭐ NEW: Stored action logs and index
+│   ├── action_log_*.json          # Individual task recordings
+│   ├── actions.ann                # Annoy vector index
+│   └── index_metadata.json        # Index metadata
 ├── pyproject.toml                 # Dependencies (uv compatible)
 ├── setup.sh                       # Setup script
 ├── run.sh                         # Run script

@@ -24,6 +24,9 @@ fi
 export WIDTH=1440
 export HEIGHT=900
 
+# Disable tokenizers parallelism to avoid fork warnings
+export TOKENIZERS_PARALLELISM=false
+
 echo "🚀 Starting macOS Agent..."
 echo "📱 Screen resolution: ${WIDTH}x${HEIGHT}"
 echo "🌐 Open http://localhost:8501 in your browser"

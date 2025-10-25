@@ -4,14 +4,14 @@
   "request": {
     "type": "user_message",
     "content": {
-      "text": "the MOMU playlist is in spotify"
+      "text": "tell me how many songs are in the MOMU playlist on Spotify"
     }
   },
   "all_actions": [
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I'll help you find out how many songs are in the MOMU playlist. Let me first take a screenshot to see what's currently on the screen."
+        "text": "I'll help you find out how many songs are in the MOMU playlist. Let me first take a screenshot to see what's currently on the screen."
       }
     },
     {
@@ -27,9 +27,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I can see the screen shows Terminal and Notes applications. To find the MOMU playlist, I need to open a music application. This could be Apple Music or Spotify. Let me check if there's a music app available. I'll start by opening Apple Music."
+        "text": "I can see the screen shows Terminal and Notes applications. To find the MOMU playlist, I need to open a music application. This could be Apple Music or Spotify. Let me check if there's a music app available. I'll start by opening Apple Music."
       }
     },
     {
@@ -58,9 +58,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I see Spotlight didn't open visibly. Let me try again and type to search for Music:"
+        "text": "I see Spotlight didn't open visibly. Let me try again and type to search for Music:"
       }
     },
     {
@@ -90,9 +90,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Let me try typing \"Music\" to search for the Music app:"
+        "text": "Let me try typing \"Music\" to search for the Music app:"
       }
     },
     {
@@ -109,9 +109,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "It seems Spotlight search didn't appear. Let me try a different approach - I'll use the bash command to open the Music app:"
+        "text": "It seems Spotlight search didn't appear. Let me try a different approach - I'll use the bash command to open the Music app:"
       }
     },
     {
@@ -140,9 +140,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Great! Apple Music has opened. I can see the sidebar with \"All Playlists\" option under the Playlists section. Let me click on \"All Playlists\" to see the available playlists and find the MOMU playlist."
+        "text": "Great! Apple Music has opened. I can see the sidebar with \"All Playlists\" option under the Playlists section. Let me click on \"All Playlists\" to see the available playlists and find the MOMU playlist."
       }
     },
     {
@@ -162,9 +162,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I see \"All Playlists\" is now selected, but the main area appears mostly blank. The content might still be loading. Let me wait a moment for it to load completely."
+        "text": "I see \"All Playlists\" is now selected, but the main area appears mostly blank. The content might still be loading. Let me wait a moment for it to load completely."
       }
     },
     {
@@ -181,57 +181,57 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "how many songs are in the MOMU playlist?"
+        "text": "how many songs are in the MOMU playlist?"
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I'll help you find out how many songs are in the MOMU playlist. Let me first take a screenshot to see what's currently on the screen."
+        "text": "I'll help you find out how many songs are in the MOMU playlist. Let me first take a screenshot to see what's currently on the screen."
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I can see the screen shows Terminal and Notes applications. To find the MOMU playlist, I need to open a music application. This could be Apple Music or Spotify. Let me check if there's a music app available. I'll start by opening Apple Music."
+        "text": "I can see the screen shows Terminal and Notes applications. To find the MOMU playlist, I need to open a music application. This could be Apple Music or Spotify. Let me check if there's a music app available. I'll start by opening Apple Music."
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I see Spotlight didn't open visibly. Let me try again and type to search for Music:"
+        "text": "I see Spotlight didn't open visibly. Let me try again and type to search for Music:"
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Let me try typing \"Music\" to search for the Music app:"
+        "text": "Let me try typing \"Music\" to search for the Music app:"
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "It seems Spotlight search didn't appear. Let me try a different approach - I'll use the bash command to open the Music app:"
+        "text": "It seems Spotlight search didn't appear. Let me try a different approach - I'll use the bash command to open the Music app:"
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Great! Apple Music has opened. I can see the sidebar with \"All Playlists\" option under the Playlists section. Let me click on \"All Playlists\" to see the available playlists and find the MOMU playlist."
+        "text": "Great! Apple Music has opened. I can see the sidebar with \"All Playlists\" option under the Playlists section. Let me click on \"All Playlists\" to see the available playlists and find the MOMU playlist."
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "I see \"All Playlists\" is now selected, but the main area appears mostly blank. The content might still be loading. Let me wait a moment for it to load completely."
+        "text": "I see \"All Playlists\" is now selected, but the main area appears mostly blank. The content might still be loading. Let me wait a moment for it to load completely."
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Ah, thank you for clarifying! The MOMU playlist is in Spotify. Let me open Spotify to find it."
+        "text": "Ah, thank you for clarifying! The MOMU playlist is in Spotify. Let me open Spotify to find it."
       }
     },
     {
@@ -260,9 +260,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Perfect! Spotify has opened and I can see the interface. I can see playlists in the left sidebar. I need to find the MOMU playlist. Let me look at the sidebar - I can see several playlist icons. I notice there's a pink \"MO\" icon in the sidebar which might be the MOMU playlist. Let me click on it."
+        "text": "Perfect! Spotify has opened and I can see the interface. I can see playlists in the left sidebar. I need to find the MOMU playlist. Let me look at the sidebar - I can see several playlist icons. I notice there's a pink \"MO\" icon in the sidebar which might be the MOMU playlist. Let me click on it."
       }
     },
     {
@@ -282,9 +282,9 @@
       }
     },
     {
-      "type": "thinking",
+      "type": "text",
       "content": {
-        "thinking": "Excellent! I found the MOMU playlist! The playlist is called \"\ud83d\udd25 momu 2023 \ud83d\uddbc\ufe0f\" and I can see important information at the top:\n\n**The MOMU playlist contains 72 songs** (as shown in the text: \"72 songs, 6 hr 58 min\")\n\nI can see the first 6 songs listed:\n1. Burning Sun - Monolink\n2. The Blame Game - HVOB, Winston Marshall  \n3. Butter - HVOB\n4. Capture Casa - HVOB\n5. Under Dark - Innellea Remix - Monolink, Innellea\n6. Fog Machine - HVOB\n\nThe playlist is 6 hours and 58 minutes long and was created by ckbw and 6 others, with 8 saves.\n\n**Answer: There are 72 songs in the MOMU playlist.**"
+        "text": "Excellent! I found the MOMU playlist! The playlist is called \"\ud83d\udd25 momu 2023 \ud83d\uddbc\ufe0f\" and I can see important information at the top:\n\n**The MOMU playlist contains 72 songs** (as shown in the text: \"72 songs, 6 hr 58 min\")\n\nI can see the first 6 songs listed:\n1. Burning Sun - Monolink\n2. The Blame Game - HVOB, Winston Marshall  \n3. Butter - HVOB\n4. Capture Casa - HVOB\n5. Under Dark - Innellea Remix - Monolink, Innellea\n6. Fog Machine - HVOB\n\nThe playlist is 6 hours and 58 minutes long and was created by ckbw and 6 others, with 8 saves.\n\n**Answer: There are 72 songs in the MOMU playlist.**"
       }
     }
   ],

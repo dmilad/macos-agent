@@ -32,10 +32,14 @@ class ActionRecorder:
 
     def record_thinking(self, thinking_content: str):
         """Record Claude's thinking block."""
+        # Skip vectordb injected messages
+        if thinking_content.startswith("Reference: I found a similar past task."):
+            return
+
         self.actions.append({
-            "type": "thinking",
+            "type": "text",
             "content": {
-                "thinking": thinking_content
+                "text": thinking_content
             }
         })
 
@@ -65,7 +69,7 @@ class ActionRecorder:
         self.actions = []
         self.session_id = datetime.now().isoformat()
 
-    async def process_and_save(self, api_key: str, output_dir: str = ".") -> str:
+    async def process_and_save(self, api_key: str, output_dir: str = "recordings") -> str:
         """
         Process recorded actions using Claude to filter and create narrative,
         then save to JSON file.

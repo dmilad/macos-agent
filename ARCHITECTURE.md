@@ -16,12 +16,14 @@
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │  1. Receive user input                                   │  │
-│  │  2. Build messages with system prompt + history          │  │
-│  │  3. Call Claude API with tool definitions                │  │
-│  │  4. Process Claude's response                            │  │
-│  │  5. Execute tool calls (if any)                          │  │
-│  │  6. Return tool results to Claude                        │  │
-│  │  7. Repeat until task complete                           │  │
+│  │  2. Query vector DB for similar past tasks (optional)    │  │
+│  │  3. Build messages with system prompt + history          │  │
+│  │  4. Call Claude API with tool definitions                │  │
+│  │  5. Process Claude's response                            │  │
+│  │  6. Execute tool calls (if any)                          │  │
+│  │  7. Record actions (action_recorder.py)                  │  │
+│  │  8. Return tool results to Claude                        │  │
+│  │  9. Repeat until task complete                           │  │
 │  └──────────────────────────────────────────────────────────┘  │
 └────────────────────┬────────────────────────────────────────────┘
                      │
@@ -53,6 +55,29 @@
 │  │ • Screenshots│  │ • Apps       │  │ • View files       │  │
 │  └──────────────┘  └──────────────┘  └────────────────────┘  │
 └────────────────────────────────────────────────────────────────┘
+
+                              ▲
+                              │
+                              │ Records successful actions
+                              │
+┌─────────────────────────────▼───────────────────────────────────┐
+│               Action Recording & Learning System                │
+│                                                                 │
+│  ┌─────────────────────┐         ┌──────────────────────────┐  │
+│  │  Action Recorder    │────────▶│   Vector Database        │  │
+│  │ (action_recorder.py)│         │   (vector_db.py)         │  │
+│  │                     │         │                          │  │
+│  │ • Record actions    │         │ • Annoy index            │  │
+│  │ • Filter successful │         │ • Sentence transformers  │  │
+│  │ • Generate narrative│         │ • Semantic search        │  │
+│  └─────────────────────┘         │ • Deduplication          │  │
+│                                  └──────────────────────────┘  │
+│           │                                   │                │
+│           │                                   │                │
+│           ▼                                   ▼                │
+│  recordings/action_log_*.json        recordings/actions.ann   │
+│                                      recordings/index_metadata │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Breakdown
@@ -182,6 +207,76 @@ class _BashSession:
 - `insert` - Insert lines at line number
 - `undo_edit` - Revert to previous version
 
+### 7. Action Recorder (`action_recorder.py`)
+**Responsibilities:**
+- Record all actions during a task session
+- Filter out failed attempts and screenshots
+- Use Claude to analyze and create a narrative
+- Save recordings to JSON files
+
+**Key Functions:**
+- `record_user_message()` - Record initial user request
+- `record_thinking()` - Record Claude's thinking blocks
+- `record_tool_use()` - Record tool executions and results
+- `process_and_save()` - Analyze with Claude and save to file
+- `_analyze_with_claude()` - Generate filtered actions and narrative
+
+**Recording Structure:**
+```json
+{
+  "session_id": "2025-10-23T17:05:56",
+  "recorded_at": "2025-10-23T17:10:23",
+  "request": {
+    "type": "user_message",
+    "content": {"text": "Check p44 messages in Notes"}
+  },
+  "all_actions": [...],
+  "successful_actions": [...],
+  "narrative": "The task was to determine how many p44-related messages..."
+}
+```
+
+### 8. Vector Database (`vector_db.py`)
+**Responsibilities:**
+- Embed requests using sentence transformers
+- Index embeddings with Annoy for fast similarity search
+- Query for similar past tasks
+- Deduplicate recordings by request text
+- Save/load index from disk
+
+**Key Functions:**
+- `build_index_from_logs()` - Build index from all recordings
+- `add_to_index()` - Add new recording to index
+- `query_similar()` - Find similar past tasks
+- `save_index()` / `load_index()` - Persist to disk
+
+**Implementation Details:**
+```python
+# Uses sentence-transformers for embeddings
+model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding = model.encode(request_text)  # 384-dim vector
+
+# Annoy for fast approximate nearest neighbor search
+index = AnnoyIndex(384, "angular")
+index.add_item(idx, embedding)
+index.build(n_trees=10)
+
+# Query returns similar requests with cosine similarity
+results = index.get_nns_by_vector(query_embedding, k=1)
+```
+
+### 9. Build Index Utility (`build_index.py`)
+**Responsibilities:**
+- CLI utility to build or rebuild vector index
+- Process all action logs in recordings directory
+- Deduplicate by request text (keep latest)
+- Save index and metadata to disk
+
+**Usage:**
+```bash
+python -m computer_use_demo.build_index [--force] [--recordings-dir DIR]
+```
+
 ## Data Flow
 
 ### Complete Task Execution Flow
@@ -265,6 +360,95 @@ class _BashSession:
    Click button, type text, etc.
 ```
 
+### Action Recording Pipeline
+
+```
+1. Task begins
+   │
+   ├─→ ActionRecorder initialized in session state
+   │
+2. User sends message
+   │
+   ├─→ record_user_message(message)
+   │
+3. Agent loop iteration
+   │
+   ├─→ Claude thinks → record_thinking(content)
+   ├─→ Claude calls tool → record_tool_use(name, input, result)
+   │
+4. Task completes
+   │
+   ├─→ User clicks "Record this session" button
+   │
+5. Process recording
+   │
+   ├─→ ActionRecorder.process_and_save(api_key)
+   │
+6. Filter and analyze
+   │
+   ├─→ Send all actions to Claude
+   ├─→ Claude removes failed attempts, screenshots, backtracking
+   ├─→ Claude generates narrative with successful actions
+   │
+7. Save to file
+   │
+   ├─→ recordings/action_log_20251023_170556.json
+   │   {
+   │     "request": {...},
+   │     "all_actions": [...],
+   │     "successful_actions": [...],
+   │     "narrative": "..."
+   │   }
+   │
+8. Build index (manual step)
+   │
+   ├─→ python -m computer_use_demo.build_index
+   ├─→ Read all action_log_*.json files
+   ├─→ Deduplicate by request text (keep latest)
+   ├─→ Embed requests with sentence-transformers
+   ├─→ Build Annoy index
+   ├─→ Save to recordings/actions.ann + index_metadata.json
+   │
+9. Future task with similar request
+   │
+   ├─→ User enables "Use vector DB" in sidebar
+   ├─→ VectorDB.query_similar(new_request, k=1)
+   ├─→ Find most similar past request (cosine similarity)
+   ├─→ Inject narrative as reference context
+   ├─→ Claude uses it to guide current task
+   │
+10. Result: Faster, more consistent execution
+```
+
+### Vector Search Flow
+
+```
+User request: "How many project-x messages in Notes?"
+   │
+   ├─→ Embed with sentence-transformers
+   │   query_embedding = model.encode(request)  # 384-dim
+   │
+   ├─→ Search Annoy index
+   │   indices, distances = index.get_nns_by_vector(query_embedding, k=1)
+   │
+   ├─→ Convert angular distance to cosine similarity
+   │   similarity = 1.0 - (distance^2 / 2.0)
+   │
+   ├─→ Filter by threshold (default: 0.5)
+   │   if similarity >= 0.5: return result
+   │
+   ├─→ Retrieved: "How many p44 messages in Notes?" (similarity: 0.87)
+   │   narrative: "The task was to determine how many p44-related
+   │              messages exist in Notes. The agent opened Notes
+   │              using 'open -a Notes', clicked the #p44 tag..."
+   │
+   ├─→ Inject into system prompt
+   │   "Reference: I found a similar past task. Here's how it was done:
+   │    [narrative with successful actions]"
+   │
+   └─→ Claude follows similar approach for current task
+```
+
 ## File Organization
 
 ```
@@ -292,6 +476,24 @@ macos-agent/
 │   │   ├── main() - Entry point
 │   │   ├── setup_state() - Session management
 │   │   └── _render_message() - Display logic
+│   │
+│   ├── action_recorder.py  # Action recording
+│   │   ├── ActionRecorder - Record task actions
+│   │   ├── record_user_message() - Record requests
+│   │   ├── record_thinking() - Record thinking blocks
+│   │   ├── record_tool_use() - Record tool executions
+│   │   └── process_and_save() - Filter and save recording
+│   │
+│   ├── vector_db.py        # Vector database for learning
+│   │   ├── ActionVectorDB - Semantic search over logs
+│   │   ├── build_index_from_logs() - Build Annoy index
+│   │   ├── query_similar() - Find similar past tasks
+│   │   └── save_index() / load_index() - Persistence
+│   │
+│   ├── build_index.py      # CLI utility to build index
+│   │   └── main() - Build vector index from recordings
+│   │
+│   ├── test_query.py       # Test vector DB queries
 │   │
 │   └── tools/
 │       ├── __init__.py     # Tool exports
@@ -326,6 +528,11 @@ macos-agent/
 │       │
 │       └── run.py          # Command execution helper
 │           └── run() - Async subprocess wrapper
+│
+├── recordings/             # Action logs and vector index
+│   ├── action_log_*.json  # Individual task recordings
+│   ├── actions.ann        # Annoy vector index file
+│   └── index_metadata.json # Index metadata and embeddings info
 ```
 
 ## Tool Versioning

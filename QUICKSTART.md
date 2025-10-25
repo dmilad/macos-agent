@@ -137,13 +137,35 @@ In the Streamlit sidebar:
 ### Screenshots failing
 → Grant Screen Recording permission in System Settings
 
+## Learning from Tasks (Optional)
+
+The agent can record successful tasks and learn from them:
+
+### Record a Task
+After completing a task successfully:
+1. Click the "Record this session" button in the UI
+2. The agent saves the successful actions to `recordings/`
+
+### Build the Knowledge Base
+```bash
+# After recording several tasks
+python -m computer_use_demo.build_index
+```
+
+### Enable Learning
+1. In the Streamlit sidebar, toggle "Use vector DB for similar tasks"
+2. The agent will now retrieve similar past solutions for new requests
+
+See [README.md](README.md#action-recording--learning) for full details.
+
 ## What's Next?
 
 1. **Read the full README.md** for detailed documentation
 2. **Try more complex tasks** like web scraping or file management
-3. **Customize the system prompt** in `computer_use_demo/loop.py`
-4. **Build your own tools** - see README.md "Development" section
-5. **Monitor API usage** at console.anthropic.com
+3. **Record successful tasks** to build up a knowledge base
+4. **Customize the system prompt** in `computer_use_demo/loop.py`
+5. **Build your own tools** - see README.md "Development" section
+6. **Monitor API usage** at console.anthropic.com
 
 ## Cost Awareness
 

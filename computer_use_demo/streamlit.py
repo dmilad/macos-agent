@@ -31,6 +31,7 @@ from computer_use_demo.loop import (
 )
 from computer_use_demo.tools import ToolResult, ToolVersion
 from computer_use_demo.action_recorder import ActionRecorder
+from computer_use_demo.vector_db import ActionVectorDB
 
 PROVIDER_TO_DEFAULT_MODEL_NAME: dict[APIProvider, str] = {
     APIProvider.ANTHROPIC: "claude-sonnet-4-5-20250929",
@@ -159,6 +160,39 @@ def setup_state():
         st.session_state.action_recorder = ActionRecorder()
     if "record_actions_pending" not in st.session_state:
         st.session_state.record_actions_pending = False
+    if "vector_db_status" not in st.session_state:
+        st.session_state.vector_db_status = None
+    if "vector_db" not in st.session_state:
+        # Initialize VectorDB and try to load existing index
+        st.session_state.vector_db = ActionVectorDB()
+        if st.session_state.vector_db.load_index():
+            # Successfully loaded existing index
+            count = st.session_state.vector_db.next_id
+            st.session_state.vector_db_status = {
+                "type": "loaded",
+                "count": count,
+            }
+        else:
+            # If no index exists, build one from existing logs
+            try:
+                count = st.session_state.vector_db.build_index_from_logs(verbose=False)
+                if count > 0:
+                    st.session_state.vector_db.save_index()
+                    st.session_state.vector_db_status = {
+                        "type": "built",
+                        "count": count,
+                    }
+                else:
+                    st.session_state.vector_db_status = {
+                        "type": "empty",
+                        "count": 0,
+                    }
+            except Exception as e:
+                st.session_state.vector_db_status = {
+                    "type": "error",
+                    "message": str(e),
+                }
+                print(f"Failed to build vector index: {e}")
 
 
 def _reset_model():
@@ -197,6 +231,18 @@ async def main():
 
     if not os.getenv("HIDE_WARNING", False):
         st.warning(WARNING_TEXT)
+
+    # Display VectorDB loading status
+    if st.session_state.vector_db_status:
+        status = st.session_state.vector_db_status
+        if status["type"] == "loaded":
+            st.success(f"✓ Vector database loaded: {status['count']} action{'s' if status['count'] != 1 else ''} indexed")
+        elif status["type"] == "built":
+            st.success(f"✓ Vector database built: {status['count']} action{'s' if status['count'] != 1 else ''} indexed from logs")
+        elif status["type"] == "empty":
+            st.info("ℹ Vector database initialized: No action logs found yet")
+        elif status["type"] == "error":
+            st.warning(f"⚠ Vector database error: {status['message']}")
 
     with st.sidebar:
 
@@ -340,6 +386,40 @@ async def main():
             # we don't have a user message to respond to, exit early
             return
 
+        # Query VectorDB for similar past requests
+        if new_message and hasattr(st.session_state, "vector_db"):
+            try:
+                similar_requests = st.session_state.vector_db.query_similar(
+                    request_text=new_message,
+                    k=1,
+                    min_similarity=0.3,
+                )
+
+                if similar_requests:
+                    best_match = similar_requests[0]
+                    narrative = best_match["narrative"]
+
+                    # Inject narrative as a text block
+                    narrative_content = (
+                        f"Reference: I found a similar past task.\n\n"
+                        f"Previous request: \"{best_match['request_text']}\"\n\n"
+                        f"Here's how it was successfully completed:\n\n{narrative}\n\n"
+                        f"I should consider this approach as a reference while adapting it to the current task."
+                    )
+
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": [{
+                            "type": "text",
+                            "text": narrative_content,
+                        }],
+                    })
+                    # Render the narrative message
+                    _render_message(Sender.BOT, {"type": "text", "text": narrative_content})
+            except Exception as e:
+                # Silently fail if vector search has issues
+                print(f"Vector search failed: {e}")
+
         with track_sampling_loop():
             # run the agent sampling loop with the newest message
             st.session_state.messages = await sampling_loop(
@@ -456,9 +536,33 @@ async def _handle_record_actions():
         with st.spinner("Processing and saving actions..."):
             filepath = await st.session_state.action_recorder.process_and_save(
                 api_key=st.session_state.api_key,
-                output_dir="."
             )
             st.success(f"Actions recorded successfully to: {filepath}")
+
+            # Update VectorDB with the new recording
+            if hasattr(st.session_state, "vector_db"):
+                try:
+                    import json
+                    from pathlib import Path
+
+                    # Load the saved recording to extract request and narrative
+                    with open(filepath) as f:
+                        recording = json.load(f)
+
+                    request_text = recording.get("request", {}).get("content", {}).get("text")
+                    narrative = recording.get("narrative")
+
+                    if request_text and narrative:
+                        # Add to vector index
+                        st.session_state.vector_db.add_to_index(
+                            request_text=request_text,
+                            narrative=narrative,
+                            log_file=Path(filepath).name,
+                        )
+                        # Save the updated index
+                        st.session_state.vector_db.save_index()
+                except Exception as e:
+                    print(f"Failed to update vector index: {e}")
 
             # Clear the recorder for the next session
             st.session_state.action_recorder.clear()
