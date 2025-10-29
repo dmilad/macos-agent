@@ -22,7 +22,7 @@ class ActionVectorDB:
         self,
         recordings_dir: str = "recordings",
         model_name: str = "all-MiniLM-L6-v2",
-        n_trees: int = 10,
+        n_trees: int = 20,
     ):
         """
         Initialize the vector database.
