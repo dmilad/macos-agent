@@ -5,6 +5,7 @@ from .base import BaseAnthropicTool
 from .bash import BashTool20241022, BashTool20250124
 from .computer_macos import ComputerToolMacOS20241022, ComputerToolMacOS20250124
 from .edit import EditTool20241022, EditTool20250728
+from .window_management import WindowManagementTool
 
 ToolVersion = Literal[
     "computer_use_20250124", "computer_use_20241022"
@@ -24,12 +25,12 @@ class ToolGroup:
 TOOL_GROUPS: list[ToolGroup] = [
     ToolGroup(
         version="computer_use_20241022",
-        tools=[ComputerToolMacOS20241022, EditTool20241022, BashTool20241022],
+        tools=[ComputerToolMacOS20241022, EditTool20241022, BashTool20241022, WindowManagementTool],
         beta_flag="computer-use-2024-10-22",
     ),
     ToolGroup(
         version="computer_use_20250124",
-        tools=[ComputerToolMacOS20250124, EditTool20250728, BashTool20250124],
+        tools=[ComputerToolMacOS20250124, EditTool20250728, BashTool20250124, WindowManagementTool],
         beta_flag="computer-use-2025-01-24",
     ),
 ]

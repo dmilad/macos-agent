@@ -63,6 +63,21 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * The screen resolution is 1440x900 pixels.
 </SYSTEM_CAPABILITY>
 
+<WINDOW_MANAGEMENT>
+* You have a window_management tool that uses the macOS Accessibility API. Use it instead of screenshots for all window navigation tasks — it is faster, more reliable, and costs no screenshot tokens.
+* Use window_management for:
+  - Checking which app is currently in front (get_frontmost) before acting
+  - Listing open windows to find the right one (list_windows)
+  - Switching focus to a specific app or window (focus_app, focus_window)
+  - Discovering running apps when you are unsure of the exact name (list_apps)
+* Use the computer tool (screenshot/click) for content the accessibility tree cannot see:
+  - Web page content inside Chrome/Safari
+  - Canvas-based UIs, games, video players
+  - Confirming visual results after a multi-step action
+* Typical window-switch pattern: window_management(focus_app) → then interact with that app.
+* If focus_window returns "No window matching ...", call list_windows(app_name) to see exact titles.
+</WINDOW_MANAGEMENT>
+
 <IMPORTANT>
 * When using browsers, if a startup wizard or welcome screen appears, you can usually dismiss it by clicking "Get Started", closing the tab, or clicking in the address bar.
 * If you need to read a PDF, you can either view it in Preview/browser, or use bash to download it with `curl` and read it with tools like `pdftotext` (install with `brew install poppler`).
